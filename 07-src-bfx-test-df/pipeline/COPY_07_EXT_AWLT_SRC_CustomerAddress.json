@@ -1,0 +1,521 @@
+{
+	"name": "COPY_07_EXT_AWLT_SRC_CustomerAddress",
+	"properties": {
+		"activities": [
+			{
+				"name": "LogExecutionStart",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource",
+						"sqlReaderStoredProcedureName": "[adf].[LogExecutionStart]",
+						"storedProcedureParameters": {
+							"ExternalExecutionID": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"IsBatch": {
+								"type": "Boolean",
+								"value": "True"
+							},
+							"PackageName": {
+								"type": "String",
+								"value": "COPY_07_EXT_AWLT_SRC_CustomerAddress"
+							},
+							"ParentExecutionID": {
+								"type": "Int64",
+								"value": {
+									"value": "@pipeline().parameters.BatchExecutionID",
+									"type": "Expression"
+								}
+							},
+							"ProjectName": {
+								"type": "String",
+								"value": "07_EXT_AWLT_SRC"
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "BimlCatalog",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "MainActivity",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "LogExecutionStart",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(equals(activity('LogExecutionStart').output.firstRow.ExecutionStatus, null), equals(activity('LogExecutionStart').output.firstRow.ExecutionStatus, 'E'))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "SQL_TRUNCATE_LND",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[sp_executesql]",
+								"storedProcedureParameters": {
+									"stmt": {
+										"value": {
+											"value": "@concat('TRUNCATE TABLE ', pipeline().parameters.TargetSchemaName, '.', pipeline().parameters.TargetTableName)",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "07_BFX_STG",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "LKP_LastLoadDate",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlSource",
+									"sqlReaderStoredProcedureName": "[adf].[GetConfigVariable]",
+									"storedProcedureParameters": {
+										"ExecutionID": {
+											"type": "Int64",
+											"value": {
+												"value": "@activity('LogExecutionStart').output.firstRow.ExecutionID",
+												"type": "Expression"
+											}
+										},
+										"ObjectName": {
+											"type": "String",
+											"value": "07_AWLT_SRC.SalesLT.CustomerAddress.ModifiedDate"
+										},
+										"SystemName": {
+											"type": "String",
+											"value": "07_AWLT_SRC"
+										},
+										"VariableName": {
+											"type": "String",
+											"value": "LastLoadDate"
+										},
+										"VariableValue": {
+											"type": "String",
+											"value": "1900-01-01"
+										}
+									},
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "BimlCatalog",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "LKP_NextLoadDate",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlSource",
+									"sqlReaderQuery": "SELECT CONVERT(VARCHAR(23),MAX(SRC.[ModifiedDate]),121) AS [NextLoadDate] FROM [SalesLT].[CustomerAddress] SRC ",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "MSSQL_07_AWLT_SRC",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "LOG_LastLoadDate",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "COPY_07_AW01_Sales_01_CustomerAddress",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[adf].[SetConfigVariable]",
+								"storedProcedureParameters": {
+									"ExecutionID": {
+										"value": {
+											"value": "@activity('LogExecutionStart').output.firstRow.ExecutionID",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"ObjectName": {
+										"value": "07_AWLT_SRC.SalesLT.CustomerAddress.ModifiedDate",
+										"type": "String"
+									},
+									"SystemName": {
+										"value": "07_AWLT_SRC",
+										"type": "String"
+									},
+									"VariableName": {
+										"value": "LastLoadDate",
+										"type": "String"
+									},
+									"VariableValue": {
+										"value": {
+											"value": "@activity('LKP_NextLoadDate').output.firstRow.NextLoadDate",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "BimlCatalog",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "COPY_07_AW01_Sales_01_CustomerAddress",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "SQL_TRUNCATE_LND",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "LKP_LastLoadDate",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								},
+								{
+									"activity": "LKP_NextLoadDate",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT [CustomerID]\n\t\t,[AddressID]\n\t\t,[AddressType]\n\t\t,[rowguid]\n\t\t,[ModifiedDate]\n\t\t,'@{pipeline().parameters.BatchStartTime}' AS [FlexRowEffectiveFromDate]\n\t\t,'@{pipeline().parameters.BatchExecutionID}' AS [FlexRowAuditId]\n\t\t,'awlt' AS [FlexRowRecordSource]\nFROM\t[SalesLT].[CustomerAddress] \nWHERE\t[ModifiedDate] > '@{activity('LKP_LastLoadDate').output.firstRow.VariableValue}'\n\tAND\t[ModifiedDate] <= '@{if(empty(activity('LKP_NextLoadDate').output), pipeline().parameters.BatchStartTime, activity('LKP_NextLoadDate').output.firstRow.NextLoadDate)}'",
+										"type": "Expression"
+									},
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink"
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "MSSQL_07_AWLT_SRC",
+									"type": "DatasetReference",
+									"parameters": {
+										"TargetSchemaName": {
+											"value": "@pipeline().parameters.TargetSchemaName",
+											"type": "Expression"
+										},
+										"TargetTableName": {
+											"value": "@pipeline().parameters.TargetTableName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "MSSQL_07_BFX_LND",
+									"type": "DatasetReference",
+									"parameters": {
+										"TargetSchemaName": {
+											"value": "@pipeline().parameters.TargetSchemaName",
+											"type": "Expression"
+										},
+										"TargetTableName": {
+											"value": "@pipeline().parameters.TargetTableName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "LOG_Rowcount",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "COPY_07_AW01_Sales_01_CustomerAddress",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[adf].[LogRowCount]",
+								"storedProcedureParameters": {
+									"ComponentName": {
+										"value": "COPY_07_AW01_Sales_01_CustomerAddress",
+										"type": "String"
+									},
+									"CountType": {
+										"value": "Copy",
+										"type": "String"
+									},
+									"ExecutionID": {
+										"value": {
+											"value": "@{activity('LogExecutionStart').output.firstRow.ExecutionID}",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"ObjectName": {
+										"value": "07_AWLT_SRC.SalesLT.CustomerAddress",
+										"type": "String"
+									},
+									"RowCount": {
+										"value": {
+											"value": "@activity('COPY_07_AW01_Sales_01_CustomerAddress').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "BimlCatalog",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "SQL_PROCESS_STG",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "COPY_07_AW01_Sales_01_CustomerAddress",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[awlt].[flex_awlt_CustomerAddress]",
+								"storedProcedureParameters": {
+									"RowAuditId": {
+										"value": {
+											"value": "@{activity('LogExecutionStart').output.firstRow.ExecutionID}",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "07_BFX_STG",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "SQL_PROCESS_DV",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "SQL_PROCESS_STG",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[rdv].[flex_awlt_CustomerAddress]",
+								"storedProcedureParameters": {
+									"RowAuditId": {
+										"value": {
+											"value": "@{activity('LogExecutionStart').output.firstRow.ExecutionID}",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "07_BFX_STG",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LOG_ExecutionEnd",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "MainActivity",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionEnd]",
+					"storedProcedureParameters": {
+						"ExecutionID": {
+							"value": {
+								"value": "@{activity('LogExecutionStart').output.firstRow.ExecutionID}",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "false",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ERR_MainActivity",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "MainActivity",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('MainActivity').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@{activity('LogExecutionStart').output.firstRow.ExecutionID}",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "false",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"BatchExecutionID": {
+				"type": "String",
+				"defaultValue": "-1"
+			},
+			"BatchStartTime": {
+				"type": "String",
+				"defaultValue": "1900-01-01"
+			},
+			"SourceQuery": {
+				"type": "String",
+				"defaultValue": "SourceQueryPlaceholder"
+			},
+			"SourceSafeScopedNamePlaceholder": {
+				"type": "String",
+				"defaultValue": "SourceSafeScopedNamePlaceholder"
+			},
+			"TargetSchemaName": {
+				"type": "String",
+				"defaultValue": "TargetSchemaNamePlaceholder"
+			},
+			"TargetTableName": {
+				"type": "String",
+				"defaultValue": "TargetTableNamePlaceholder"
+			}
+		},
+		"folder": {
+			"name": "07_EXT_AWLT_SRC/Copy"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-08-21T20:17:54Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

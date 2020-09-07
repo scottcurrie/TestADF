@@ -1,0 +1,317 @@
+{
+	"name": "01_07_LOAD_BFX_RDV_awlt_Batch_3_0",
+	"properties": {
+		"activities": [
+			{
+				"name": "07_LOAD_BFX_RDV_awlt_Sales1_Address",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "07_LOAD_BFX_RDV_awlt_Sales1_Address",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ERR_07_LOAD_BFX_RDV_awlt_Sales1_Address",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_RDV_awlt_Sales1_Address",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_LOAD_BFX_RDV_awlt_Sales1_Address').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_LOAD_BFX_RDV_awlt_Sales1_ProductCategory",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_RDV_awlt_Sales1_Address",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "07_LOAD_BFX_RDV_awlt_Sales1_ProductCategory",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ERR_07_LOAD_BFX_RDV_awlt_Sales1_ProductCategory",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_RDV_awlt_Sales1_ProductCategory",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_LOAD_BFX_RDV_awlt_Sales1_ProductCategory').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_LOAD_BFX_RDV_awlt_Sales1_Customer",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "07_LOAD_BFX_RDV_awlt_Sales1_Customer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ERR_07_LOAD_BFX_RDV_awlt_Sales1_Customer",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_RDV_awlt_Sales1_Customer",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_LOAD_BFX_RDV_awlt_Sales1_Customer').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_LOAD_BFX_RDV_awlt_Sales1_ProductModel",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_RDV_awlt_Sales1_Customer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "07_LOAD_BFX_RDV_awlt_Sales1_ProductModel",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ERR_07_LOAD_BFX_RDV_awlt_Sales1_ProductModel",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_RDV_awlt_Sales1_ProductModel",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_LOAD_BFX_RDV_awlt_Sales1_ProductModel').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"BatchExecutionID": {
+				"type": "String",
+				"defaultValue": "-1"
+			},
+			"BatchStartTime": {
+				"type": "String",
+				"defaultValue": "1900-01-01"
+			}
+		},
+		"folder": {
+			"name": "07_LOAD_BFX_RDV/Batch"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-08-21T20:18:01Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

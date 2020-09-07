@@ -1,0 +1,325 @@
+{
+	"name": "01_07_EXT_AWLT_SRC_Batch_3_0",
+	"properties": {
+		"activities": [
+			{
+				"name": "07_EXT_AWLT_SRC_Address",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "COPY_07_EXT_AWLT_SRC_Address",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						},
+						"TargetSchemaName": "awlt",
+						"TargetTableName": "land_Address"
+					}
+				}
+			},
+			{
+				"name": "ERR_07_EXT_AWLT_SRC_Address",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_EXT_AWLT_SRC_Address",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_EXT_AWLT_SRC_Address').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_EXT_AWLT_SRC_ProductCategory",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "07_EXT_AWLT_SRC_Address",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "COPY_07_EXT_AWLT_SRC_ProductCategory",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						},
+						"TargetSchemaName": "awlt",
+						"TargetTableName": "land_ProductCategory"
+					}
+				}
+			},
+			{
+				"name": "ERR_07_EXT_AWLT_SRC_ProductCategory",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_EXT_AWLT_SRC_ProductCategory",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_EXT_AWLT_SRC_ProductCategory').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_EXT_AWLT_SRC_Customer",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "COPY_07_EXT_AWLT_SRC_Customer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						},
+						"TargetSchemaName": "awlt",
+						"TargetTableName": "land_Customer"
+					}
+				}
+			},
+			{
+				"name": "ERR_07_EXT_AWLT_SRC_Customer",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_EXT_AWLT_SRC_Customer",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_EXT_AWLT_SRC_Customer').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_EXT_AWLT_SRC_ProductModel",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "07_EXT_AWLT_SRC_Customer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "COPY_07_EXT_AWLT_SRC_ProductModel",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						},
+						"TargetSchemaName": "awlt",
+						"TargetTableName": "land_ProductModel"
+					}
+				}
+			},
+			{
+				"name": "ERR_07_EXT_AWLT_SRC_ProductModel",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_EXT_AWLT_SRC_ProductModel",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_EXT_AWLT_SRC_ProductModel').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"BatchExecutionID": {
+				"type": "String",
+				"defaultValue": "-1"
+			},
+			"BatchStartTime": {
+				"type": "String",
+				"defaultValue": "1900-01-01"
+			}
+		},
+		"folder": {
+			"name": "07_EXT_AWLT_SRC/Batch"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-08-21T20:17:55Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

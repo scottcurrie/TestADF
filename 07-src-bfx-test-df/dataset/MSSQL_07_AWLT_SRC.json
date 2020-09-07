@@ -1,0 +1,36 @@
+{
+	"name": "MSSQL_07_AWLT_SRC",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "07_AWLT_SRC",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"TargetSchemaName": {
+				"type": "string",
+				"defaultValue": "TargetSchemaNamePlaceholder"
+			},
+			"TargetTableName": {
+				"type": "string",
+				"defaultValue": "TargetTableNamePlaceholder"
+			}
+		},
+		"folder": {
+			"name": "07_EXT_AWLT_SRC"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().TargetSchemaName",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TargetTableName",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

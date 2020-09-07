@@ -1,0 +1,11 @@
+{
+	"name": "src-bfx-test-kv",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://src-bfx-test-kv.vault.azure.net"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,200 @@
+{
+	"name": "07_LOAD_BFX_RDV_awlt_Sales1_Address",
+	"properties": {
+		"activities": [
+			{
+				"name": "LogExecutionStart",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlSource",
+						"sqlReaderStoredProcedureName": "[adf].[LogExecutionStart]",
+						"storedProcedureParameters": {
+							"ExternalExecutionID": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().RunId",
+									"type": "Expression"
+								}
+							},
+							"IsBatch": {
+								"type": "Boolean",
+								"value": "True"
+							},
+							"PackageName": {
+								"type": "String",
+								"value": "07_LOAD_BFX_RDV_awlt_Sales1_Address"
+							},
+							"ParentExecutionID": {
+								"type": "Int64",
+								"value": {
+									"value": "@pipeline().parameters.BatchExecutionID",
+									"type": "Expression"
+								}
+							},
+							"ProjectName": {
+								"type": "String",
+								"value": "07_LOAD_BFX_RDV"
+							}
+						},
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "BimlCatalog",
+						"type": "DatasetReference"
+					}
+				}
+			},
+			{
+				"name": "MainActivity",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "LogExecutionStart",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(equals(activity('LogExecutionStart').output.firstRow.ExecutionStatus, null), equals(activity('LogExecutionStart').output.firstRow.ExecutionStatus, 'E'))",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ProcessTargetTable",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[rdv].[flex_awlt_Address]",
+								"storedProcedureParameters": {
+									"RowAuditId": {
+										"value": {
+											"value": "@pipeline().parameters.BatchExecutionID",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "07_BFX_RDV",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "ERR_ProcessTargetTable",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "ProcessTargetTable",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"retryIntervalInSeconds": 30
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[adf].[LogExecutionError]",
+								"storedProcedureParameters": {
+									"ErrorDescription": {
+										"value": {
+											"value": "@string(activity('ProcessTargetTable').Error)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"ExecutionID": {
+										"value": {
+											"value": "@{activity('LogExecutionStart').output.firstRow.ExecutionID}",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"IsBatch": {
+										"value": "true",
+										"type": "Boolean"
+									},
+									"Raiserror": {
+										"value": "true",
+										"type": "Boolean"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "BimlCatalog",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LOG_ExecutionEnd",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "MainActivity",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionEnd]",
+					"storedProcedureParameters": {
+						"ExecutionID": {
+							"value": {
+								"value": "@{activity('LogExecutionStart').output.firstRow.ExecutionID}",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"BatchExecutionID": {
+				"type": "String",
+				"defaultValue": "-1"
+			},
+			"BatchStartTime": {
+				"type": "String",
+				"defaultValue": "1900-01-01"
+			}
+		},
+		"folder": {
+			"name": "07_LOAD_BFX_RDV/Process"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-08-21T20:17:53Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

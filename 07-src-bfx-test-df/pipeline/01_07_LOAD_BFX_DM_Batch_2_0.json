@@ -1,0 +1,247 @@
+{
+	"name": "01_07_LOAD_BFX_DM_Batch_2_0",
+	"properties": {
+		"activities": [
+			{
+				"name": "07_LOAD_BFX_DM_dbo_dimAddress",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "07_LOAD_BFX_DM_dbo_dimAddress",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ERR_07_LOAD_BFX_DM_dbo_dimAddress",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_DM_dbo_dimAddress",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_LOAD_BFX_DM_dbo_dimAddress').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_LOAD_BFX_DM_dbo_dimCustomer",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_DM_dbo_dimAddress",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "07_LOAD_BFX_DM_dbo_dimCustomer",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ERR_07_LOAD_BFX_DM_dbo_dimCustomer",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_DM_dbo_dimCustomer",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_LOAD_BFX_DM_dbo_dimCustomer').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "07_LOAD_BFX_DM_dbo_dimProduct",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_DM_dbo_dimCustomer",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "07_LOAD_BFX_DM_dbo_dimProduct",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"BatchExecutionID": {
+							"value": "@pipeline().parameters.BatchExecutionID",
+							"type": "Expression"
+						},
+						"BatchStartTime": {
+							"value": "@pipeline().parameters.BatchStartTime",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ERR_07_LOAD_BFX_DM_dbo_dimProduct",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "07_LOAD_BFX_DM_dbo_dimProduct",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"retryIntervalInSeconds": 30
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[adf].[LogExecutionError]",
+					"storedProcedureParameters": {
+						"ErrorDescription": {
+							"value": {
+								"value": "@string(activity('07_LOAD_BFX_DM_dbo_dimProduct').Error)",
+								"type": "Expression"
+							},
+							"type": "String"
+						},
+						"ExecutionID": {
+							"value": {
+								"value": "@pipeline().parameters.BatchExecutionID",
+								"type": "Expression"
+							},
+							"type": "Int64"
+						},
+						"IsBatch": {
+							"value": "true",
+							"type": "Boolean"
+						},
+						"Raiserror": {
+							"value": "true",
+							"type": "Boolean"
+						}
+					}
+				},
+				"linkedServiceName": {
+					"referenceName": "BimlCatalog",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"BatchExecutionID": {
+				"type": "String",
+				"defaultValue": "-1"
+			},
+			"BatchStartTime": {
+				"type": "String",
+				"defaultValue": "1900-01-01"
+			}
+		},
+		"folder": {
+			"name": "07_LOAD_BFX_DM/Batch"
+		},
+		"annotations": [],
+		"lastPublishTime": "2020-08-21T20:17:55Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
